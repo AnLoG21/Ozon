@@ -3,17 +3,27 @@ package database
 import (
 	"awesomeProject/models"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
 var db *sql.DB
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "Log680968amr"
+	dbname   = "postgres"
+)
+
 func init() {
-	var err error
-	db, err = sql.Open("postgres", "user=postgres password=Log680968amr dbname=postgres sslmode=disable")
-	if err != nil {
-		panic(err)
-	}
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	sql.Open("postgres", psqlInfo)
+
 }
 
 func GetCommentsByPostID(postId int) ([]*models.Comment, error) {
@@ -58,13 +68,10 @@ func GetPostByID(id int) (*models.Post, error) {
 }
 
 func CreatePost(post models.Post) *models.Post {
-	// Устанавливаем текущую дату и время перед вставкой
 	post.CreatedAt = time.Now()
 
-	// Выполняем SQL-запрос для вставки новой записи в таблицу posts
 	row := db.QueryRow("INSERT INTO posts (title, content, allow_comments, created_at) VALUES ($1, $2, $3, $4) RETURNING id", post.Title, post.Content, post.AllowComments, post.CreatedAt)
 
-	// Получаем идентификатор вставленного поста
 	err := row.Scan(&post.ID)
 	if err != nil {
 		return nil

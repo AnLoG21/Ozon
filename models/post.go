@@ -13,5 +13,5 @@ type Post struct {
 
 func (p Post) Error() string {
 	//TODO implement me
-	panic("implement me")
+	return p.Content
 }
